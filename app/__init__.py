@@ -1,0 +1,1 @@
+"""PayParity app package."""

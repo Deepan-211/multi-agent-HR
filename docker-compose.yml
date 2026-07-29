@@ -1,0 +1,94 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL + pgvector ──────────────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: payparity_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-payparity}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-payparity_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-payparity}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payparity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis (Celery broker + result backend) ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: payparity_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── FastAPI Application ────────────────────────────────────────────────────
+  api:
+    build: .
+    container_name: payparity_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      SYNC_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    working_dir: /app
+
+  # ── Celery Worker ──────────────────────────────────────────────────────────
+  worker:
+    build: .
+    container_name: payparity_worker
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      SYNC_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-super-secret-key-change-in-production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    working_dir: /app
+
+  # ── Celery Beat (periodic tasks) ───────────────────────────────────────────
+  beat:
+    build: .
+    container_name: payparity_beat
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      SYNC_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-payparity}:${POSTGRES_PASSWORD:-payparity_secret}@db:5432/${POSTGRES_DB:-payparity}
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    working_dir: /app
+
+volumes:
+  pgdata:
