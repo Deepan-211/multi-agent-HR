@@ -56,8 +56,8 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f"  [WARN] Seed error (non-fatal): {e}")
 
-    print("[OK] PayParity ready at http://localhost:8001")
-    print("     API docs: http://localhost:8001/docs")
+    print("[OK] PayParity ready at http://localhost:8000")
+    print("     API docs: http://localhost:8000/docs")
     yield
 
     # Shutdown
