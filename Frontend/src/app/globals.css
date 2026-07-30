@@ -1,0 +1,216 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Main palette */
+  --color-bg-primary: #f4efe4;
+  --color-bg-secondary: #ece3d2;
+  --color-border-custom: #2b2b28;
+
+  /* Accent ochre/mustard */
+  --color-accent-violet: #c98a1c;
+  --color-accent-violet-light: #d89c2c;
+  --color-accent-cyan: #c98a1c;
+  --color-success: #4d7c0f;
+  --color-error: #b91c1c;
+
+  /* Primary texts */
+  --color-text-main: #2b2b28;
+  --color-text-muted: #5a564d;
+
+  /* Override Tailwind slate colors to parchment/charcoal variants so dark-mode specific classes shift to newspaper look */
+  --color-slate-100: #2b2b28;
+  --color-slate-200: #2b2b28;
+  --color-slate-300: #5a564d;
+  --color-slate-400: #5a564d;
+  --color-slate-500: #5a564d;
+  --color-slate-600: #5a564d;
+  --color-slate-700: #5a564d;
+  --color-slate-800: #ece3d2;
+  --color-slate-900: #ece3d2;
+
+  /* Map standard white/black to charcoal/parchment respectively */
+  --color-white: #2b2b28;
+  --color-black: #f4efe4;
+
+  /* Fonts */
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+
+  /* Force sharp borders everywhere */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-full: 0px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f4efe4;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b2b28;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5a564d;
+}
+
+body {
+  background-color: #f4efe4;
+  color: #2b2b28;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Headings typography */
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-heading) !important;
+  color: #2b2b28;
+}
+
+/* Card headings and accent colored elements */
+.glass-panel h3,
+.glass-panel h4,
+.glass-panel h2,
+.login-card h2,
+.login-card .brand-name {
+  color: #c98a1c !important;
+}
+
+/* Accent color for links and hover underlines */
+a:not(.btn-primary):not(.btn-secondary):not(.skip-btn):not(.signin-btn):not([class*="bg-accent-violet"]) {
+  transition: text-decoration 0.2s ease;
+}
+a:hover:not(.btn-primary):not(.btn-secondary):not(.skip-btn):not(.signin-btn):not([class*="bg-accent-violet"]):not([class*="hover:bg-white/5"]) {
+  text-decoration: underline !important;
+  text-decoration-color: #c98a1c !important;
+}
+
+/* Primary CTA override */
+.bg-accent-violet,
+button[type="submit"],
+button.signin-btn,
+.signin-btn,
+.register-btn {
+  background-color: #2b2b28 !important;
+  background-image: none !important;
+  color: #f4efe4 !important;
+  border-radius: 0px !important;
+  border: 1px solid #2b2b28 !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Ensure text inside primary CTA is parchment */
+.bg-accent-violet *,
+button[type="submit"] *,
+button.signin-btn *,
+.signin-btn *,
+.register-btn * {
+  color: #f4efe4 !important;
+  background-image: none !important;
+}
+
+/* Primary CTA hover */
+.bg-accent-violet:hover,
+button[type="submit"]:hover,
+button.signin-btn:hover,
+.signin-btn:hover,
+.register-btn:hover {
+  background-color: #5a564d !important;
+  border-color: #5a564d !important;
+  color: #f4efe4 !important;
+}
+
+/* Glass panel (Card) utility */
+.glass-panel {
+  background: #f4efe4 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: 2px solid #2b2b28 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-panel-hover:hover {
+  background: #ece3d2 !important;
+  border-color: #2b2b28 !important;
+  box-shadow: none !important;
+}
+
+/* Secondary CTA / outlined buttons */
+.btn-secondary, 
+a[href*="/dashboard"].text-slate-300:not([class*="hover:text-accent-cyan"]),
+.bg-white\/5.border:not(.rounded-full) {
+  background-color: transparent !important;
+  border: 1px solid #2b2b28 !important;
+  color: #2b2b28 !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.btn-secondary:hover, 
+a[href*="/dashboard"].text-slate-300:not([class*="hover:text-accent-cyan"]):hover,
+.bg-white\/5.border:not(.rounded-full):hover {
+  background-color: #2b2b28 !important;
+  color: #f4efe4 !important;
+}
+
+/* Fix specific gradient overlays to none */
+.bg-gradient-to-r, .bg-gradient-to-tr {
+  background-image: none !important;
+}
+.glow-violet, .glow-cyan {
+  box-shadow: none !important;
+}
+
+/* Remove grid background pattern */
+.bg-grid-pattern {
+  background-image: none !important;
+}
+
+/* Pulse animation for processing */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.92);
+  }
+}
+
+.animate-status-pulse {
+  animation: status-pulse 2s infinite ease-in-out;
+}
+
+/* Custom glowing borders */
+.border-gradient-violet-cyan {
+  border: 1px solid #2b2b28 !important;
+  background-image: none !important;
+}
+
+/* Text selections */
+::selection {
+  background: rgba(201, 138, 28, 0.3);
+  color: #2b2b28;
+}

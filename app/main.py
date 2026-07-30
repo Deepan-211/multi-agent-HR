@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import select, func
@@ -94,6 +94,32 @@ class DecisionRequest(BaseModel):
 @app.get("/")
 async def root():
     return {"status": "PayParity API is running", "version": "2.0.0"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "version": "2.0.0"}
+
+# ── API Routers ─────────────────────────────────────────────────────────────
+from app.api import (
+    admin, agents, audits as api_audits, auth, bias_flags, counterfactuals,
+    datasets, hitl as api_hitl, observability, organizations, privacy, recommendations
+)
+
+api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_v1_router.include_router(agents.router, prefix="/agents", tags=["agents"])
+api_v1_router.include_router(api_audits.router, prefix="/audits", tags=["audits"])
+api_v1_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_v1_router.include_router(bias_flags.router, prefix="/bias-flags", tags=["bias-flags"])
+api_v1_router.include_router(counterfactuals.router, prefix="/counterfactuals", tags=["counterfactuals"])
+api_v1_router.include_router(datasets.router, prefix="/datasets", tags=["datasets"])
+api_v1_router.include_router(api_hitl.router, prefix="/hitl", tags=["hitl"])
+api_v1_router.include_router(observability.router, prefix="/observability", tags=["observability"])
+api_v1_router.include_router(organizations.router, prefix="/organizations", tags=["organizations"])
+api_v1_router.include_router(privacy.router, prefix="/privacy", tags=["privacy"])
+api_v1_router.include_router(recommendations.router, prefix="/recommendations", tags=["recommendations"])
+
+app.include_router(api_v1_router)
 
 
 # ── 1. POST /api/audits/start ──────────────────────────────────────────────
